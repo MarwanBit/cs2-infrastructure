@@ -76,16 +76,16 @@ Overall, the application is highly coupled, utilizing **AWS** and local stack to
 
 (List and briefly describe the main components of the system. For each, include its primary responsibility and key technologies used.)
 
-1. **cs2-webscraper-service:**
-2. **cs2-ml-pipeline-service:**
-3. **cs2-backend-service:**
-4. **cs2-frontend-service:**
+1. **cs2-webscraper-service:** A python based webscraper with rate-limiting which scrapes from **HLTV** and the **PandaScore API** in order to dump data into a relational PostgresSQL database, using **Dependency Injection** to ensure a modular design.
+2. **cs2-ml-pipeline-service:** An **Amazon Sagemake**r based **ETL pipeline** which takes match data from the relational database managed by the **cs2-webscraper-service** which extracts, transforms, performs feature engineering, trains, and deploys the relevant ML models (making sure the ML models pass accuracy constraints). The pipeline then dumps the model files into an S3 Bucket for model inference.
+3. **cs2-backend-service:** A **Django** server (which is deployed as serverless using EC2) which serves the model, alongside allowing access to matches, predictions, users, teams, etc.
+4. **cs2-frontend-service:** A **NextJS** Application utilizing Clerk as a service to allow users to sign-up, log-in, create and view predictions, including ML powered predictions.
 
 ### 3.1. Frontend
 
 Name: **cs2-frontend-service**
 
-Description: Briefly describe its primary purpose, key functionalities, and how users or other systems interact with it. E.g., 'The main user interface for interacting with the system, allowing users to manage their profiles, view data dashboards, and initiate workflows.'
+Description: A **NextJS** Application utilizing Clerk as a service to allow users to sign-up, log-in, create and view predictions, including ML powered predictions.
 
 Technologies: **NextJS, React, TailwindCSS, ShadcnUI, Clerk**
 
@@ -97,35 +97,33 @@ Deployment: **Vercel**
 
 Name: **cs2-webscraper-service**
 
-Description: [Briefly describe its purpose, e.g., "Handles user authentication and profile management."]
+Description: A rate-limited Python based webscraper which scrapes HLTV and the Pandascore API in order to populate a relational PostgresSQL Database.
 
-Technologies:
+Technologies: **Python, BeautifulSoup, PostgresSQL, psycopg2, Alembic, PyTest, Poetry, Pandascore API**
 
-Deployment:
+Deployment: **AWS Lambda Functions, AWS CloudWatch, Docker, LocalStack**
 
 #### 3.2.2. cs2-ml-pipeline-service
 
 Name: **cs2-ml-pipeline-service**
 
-Description: [Briefly describe its purpose.]
+Description: An **Amazon Sagemake**r based **ETL pipeline** which takes match data from the relational database managed by the **cs2-webscraper-service** which extracts, transforms, performs feature engineering, trains, and deploys the relevant ML models (making sure the ML models pass accuracy constraints). The pipeline then dumps the model files into an S3 Bucket for model inference.
 
-Technologies: [e.g., Python, Kafka, Redis]
+Technologies: **Amazon Sagemaker, ScikitLearn, TensorFlow, Pandas, Numpy, Python**
 
-Deployment: [e.g., AWS ECS, Google Cloud Run]
+Deployment: **Amazon Sagemaker, AWS Lambda Functions, Amazon CloudWatch, LocalStack**
 
 #### 3.2.3. cs2-backend-service
 
 Name: **cs2-backend-service**
 
-Description: [Briefly describe its purpose.]
+Description: A **Django** server (which is deployed as serverless using EC2) which serves the model, alongside allowing access to matches, predictions, users, teams, etc.
 
 Technologies: **Python, Django, Amazon S3**
 
-Deployment: [e.g., AWS ECS, Google Cloud Run]
+Deployment: **Amazon EC2, Docker, Amazon S3, LocalStack, Amazon API Gateway**
 
 ## 4. Data Stores
-
-(List and describe the databases and other persistent storage solutions used.)
 
 ### 4.1. Amazon RDS DB
 
@@ -133,23 +131,23 @@ Name: **cs2-database**
 
 Type: PostgresSQL
 
-Purpose: [Briefly describe what data it stores and why.]
+Purpose: Store the raw, normalized data which will be used as the basis for feature engineering and extraction by the **cs2-ml-pipeline-service**. Additionally stores data relevant for the user to obtain on the frontend.
 
-Key Schemas/Collections: [List important tables/collections, e.g., users, products, orders (no need for full schema, just names)]
+Key Schemas/Collections: teams, matches, results, predictions, maps.
 
-### 4.2. [Data Store Type 2]
+### 4.2. Amazon S3 Bucket
 
-Name: [e.g., Cache, Message Queue]
+Name: **cs2-model-bucket**
 
-Type: [e.g., Redis, Kafka, RabbitMQ]
+Type: **Amazon S3 Bucket**
 
-Purpose: [Briefly describe its purpose, e.g., "Used for caching frequently accessed data" or "Inter-service communication."]
+Purpose: stores the model files of the most up to date ml models for model inference.
 
 ## 5. External Integrations / APIs
 
 Service Name 1: Clerk
 
-Purpose: [Briefly describe its function, e.g., "Payment processing."]
+Purpose: Handles user authentication, role-based authentication control, authorization, OAuth, JWTs etc.
 
 Integration Method: NextJS SDK
 
@@ -157,27 +155,23 @@ Integration Method: NextJS SDK
 
 Cloud Provider: AWS
 
-Key Services Used: [e.g., EC2, Lambda, S3, RDS, Kubernetes, Cloud Functions, App Engine]
+Key Services Used: EC2, Lambda, CloudWatch, SageMaker,  IAM Identity Center, S3, RDS, VPC, API Gateway
 
-CI/CD Pipeline: [e.g., GitHub Actions, GitLab CI, Jenkins, CircleCI]
+CI/CD Pipeline: Github Actions, Vercel Deployment
 
-Monitoring & Logging: [e.g., Prometheus, Grafana, CloudWatch, Stackdriver, ELK Stack]
+Monitoring & Logging: Prometheus + Grafana
 
 ## 7. Security Considerations
 
-(Highlight any critical security aspects, authentication mechanisms, or data encryption practices.)
+The most important concern is to make sure that users cannot obtain access to the database directly, as the data cannot be accessible to the public since it is webscraped, it should only be used to power the model.
 
-Authentication: [e.g., OAuth2, JWT, API Keys]
+Authentication: OAuth2, JWTs
 
-Authorization: [e.g., RBAC, ACLs]
-
-Data Encryption: [e.g., TLS in transit, AES-256 at rest]
-
-Key Security Tools/Practices: [e.g., WAF, regular security audits]
+Authorization: RBAC
 
 ## 8. Development & Testing Environment
 
-Local Setup Instructions: [Link to CONTRIBUTING.md or brief steps]
+Local Setup Instructions: [CONTRIBUTING.md](./CONTRIBUTING.md)
 
 Testing Frameworks: Jest, PyTest, Cypress
 
@@ -187,9 +181,10 @@ Code Quality Tools: ESLint, Prettier, Ruff
 
 (Briefly note any known architectural debts, planned major changes, or significant future features that might impact the architecture.)
 
-[e.g., "Migrate from monolith to microservices."]
-
-[e.g., "Implement event-driven architecture for real-time updates."]
+* Architecural Debts
+  * Using Clerk as a service makes it difficult to test locally, as the service is third-party and cannot be hosted locally, thus we don't get truly "local" development, attempting to mock Clerk or use some other AWS service for authentication that has a LocalStack equivalent could work. Additionally, thinking of how we can abstract authentication to a seperate service to allow for Dependency Injection maybe a useful approach.
+* Major Planned Changes
+  * Adding a players table, migrating the associated schema to enable more robust and rich feature engineering in the ETL pipeline.
 
 ## 10. Project Identification
 
