@@ -1,0 +1,2 @@
+"""Git ignore file - excludes services/ directory (cloned repos), Terraform state files, and build artifacts."""
+
