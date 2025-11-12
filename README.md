@@ -1,9 +1,19 @@
 # CS2 Match Predictor - Infrastructure Orchestration
 
-
 # Project Overview
 
 **cs2-match-predictor** is a Full-Stack application built on top of a End-to-End Machine Learning Pipeline which enables users to make and view predictions for upcoming cs2 matches, alongside viewing ML powered match prediction. It makes deep use of AWS services in order to regularly scrape and dump data into an PostgresSQL relational database, enabling regularly scheduled model training, served on a backend Django server.
+
+The project uses a microservice architecture, with each microservice getting its own repository, this repository act as a metarepository which orchestrates all of the services together for deployment. Below we have a description of each of the other repositories with links.
+
+* **cs2-webscraper-service:** A python based webscraper with rate-limiting which scrapes from **HLTV** and the **PandaScore API** in order to dump data into a relational PostgresSQL database, using **Dependency Injection** to ensure a modular design.
+  * [cs2-webscraper-service](https://github.com/MarwanBit/cs2-webscraper-service)
+* **cs2-ml-pipeline-service:** An **Amazon Sagemake**r based **ETL pipeline** which takes match data from the relational database managed by the **cs2-webscraper-service** which extracts, transforms, performs feature engineering, trains, and deploys the relevant ML models (making sure the ML models pass accuracy constraints). The pipeline then dumps the model files into an S3 Bucket for model inference.
+  * [cs2-ml-pipeline-service](https://github.com/MarwanBit/cs2-ml-pipeline-service)
+* **cs2-backend-service:** A **Django** server (which is deployed as serverless using EC2) which serves the model, alongside allowing access to matches, predictions, users, teams, etc.
+  * [cs2-backend-service](https://github.com/MarwanBit/cs2-backend-service)
+* **cs2-frontend-service:** A **NextJS** Application utilizing Clerk as a service to allow users to sign-up, log-in, create and view predictions, including ML powered predictions.
+  * [cs2-frontend-service](https://github.com/MarwanBit/cs2-frontend-service)
 
 # Tech Stack
 

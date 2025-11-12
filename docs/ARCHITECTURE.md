@@ -74,8 +74,6 @@ Overall, the application is highly coupled, utilizing **AWS** and local stack to
 
 ## 3. Core Components
 
-(List and briefly describe the main components of the system. For each, include its primary responsibility and key technologies used.)
-
 1. **cs2-webscraper-service:** A python based webscraper with rate-limiting which scrapes from **HLTV** and the **PandaScore API** in order to dump data into a relational PostgresSQL database, using **Dependency Injection** to ensure a modular design.
 2. **cs2-ml-pipeline-service:** An **Amazon Sagemake**r based **ETL pipeline** which takes match data from the relational database managed by the **cs2-webscraper-service** which extracts, transforms, performs feature engineering, trains, and deploys the relevant ML models (making sure the ML models pass accuracy constraints). The pipeline then dumps the model files into an S3 Bucket for model inference.
 3. **cs2-backend-service:** A **Django** server (which is deployed as serverless using EC2) which serves the model, alongside allowing access to matches, predictions, users, teams, etc.
@@ -178,8 +176,6 @@ Testing Frameworks: Jest, PyTest, Cypress
 Code Quality Tools: ESLint, Prettier, Ruff
 
 ## 9. Future Considerations / Roadmap
-
-(Briefly note any known architectural debts, planned major changes, or significant future features that might impact the architecture.)
 
 * Architectural Debts
   * Using Clerk as a service makes it difficult to test locally, as the service is third-party and cannot be hosted locally, thus we don't get truly "local" development, attempting to mock Clerk or use some other AWS service for authentication that has a LocalStack equivalent could work. Additionally, thinking of how we can abstract authentication to a seperate service to allow for Dependency Injection maybe a useful approach.
