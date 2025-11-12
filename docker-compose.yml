@@ -1,1 +1,1 @@
-"""Docker Compose file for local development - orchestrates all services and LocalStack in one command."""
+"Docker Compose file for local development - orchestrates all services and LocalStack in one command."
