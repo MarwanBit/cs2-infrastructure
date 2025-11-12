@@ -181,7 +181,7 @@ Code Quality Tools: ESLint, Prettier, Ruff
 
 (Briefly note any known architectural debts, planned major changes, or significant future features that might impact the architecture.)
 
-* Architecural Debts
+* Architectural Debts
   * Using Clerk as a service makes it difficult to test locally, as the service is third-party and cannot be hosted locally, thus we don't get truly "local" development, attempting to mock Clerk or use some other AWS service for authentication that has a LocalStack equivalent could work. Additionally, thinking of how we can abstract authentication to a seperate service to allow for Dependency Injection maybe a useful approach.
 * Major Planned Changes
   * Adding a players table, migrating the associated schema to enable more robust and rich feature engineering in the ETL pipeline.
